@@ -1,337 +1,922 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Quran App</title>
+<title>My Quran</title>
 
 <style>
-    * {
-        box-sizing: border-box;
-    }
+* {
+    box-sizing: border-box;
+}
 
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #f3f7f5;
-        color: #17231f;
-    }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #eef7f1;
+    color: #123b2a;
+}
 
-    header {
-        background: #075e54;
-        color: white;
-        padding: 20px;
-        text-align: center;
-    }
+header {
+    background: #075e3b;
+    color: white;
+    text-align: center;
+    padding: 28px 15px;
+}
 
-    header h1 {
-        margin: 0;
-        font-size: 30px;
-    }
+header h1 {
+    margin: 0;
+    font-size: 36px;
+}
 
-    header p {
-        margin: 6px 0 0;
-    }
+header p {
+    margin: 8px 0 0;
+}
 
-    .controls {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        flex-wrap: wrap;
-        padding: 15px;
-        background: white;
-        box-shadow: 0 2px 8px #0002;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+}
 
-    button, select {
-        padding: 11px 16px;
-        border: none;
-        border-radius: 10px;
-        background: #087f5b;
-        color: white;
-        font-size: 15px;
-        cursor: pointer;
-    }
+.panel,
+.quran-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
 
-    button:hover {
-        background: #056b4c;
-    }
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
 
-    select {
-        background: #333;
-    }
+select,
+button {
+    padding: 12px 14px;
+    font-size: 16px;
+    border-radius: 9px;
+    border: 1px solid #aaa;
+}
 
-    .container {
-        max-width: 900px;
-        margin: 25px auto;
-        padding: 0 15px;
-    }
+select {
+    flex: 1;
+    min-width: 230px;
+    background: white;
+}
 
-    .ayah {
-        background: white;
-        margin-bottom: 18px;
-        padding: 22px;
-        border-radius: 16px;
-        box-shadow: 0 3px 12px #0001;
-    }
+button {
+    background: #075e3b;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
 
-    .number {
-        display: inline-block;
-        background: #087f5b;
-        color: white;
-        border-radius: 50%;
-        width: 34px;
-        height: 34px;
-        text-align: center;
-        padding-top: 8px;
-        margin-bottom: 12px;
-    }
+button:hover {
+    background: #08784b;
+}
 
-    .arabic {
-        direction: rtl;
-        text-align: right;
-        font-size: 29px;
-        line-height: 2;
-        font-family: "Traditional Arabic", "Noto Naskh Arabic", serif;
-    }
+.stop {
+    background: #a52828;
+}
 
-    .meaning {
-        margin-top: 15px;
-        padding: 15px;
-        border-left: 4px solid #087f5b;
-        background: #f0f8f5;
-        line-height: 1.7;
-        font-size: 17px;
-    }
+.status {
+    padding: 14px;
+    border-radius: 10px;
+    background: #fff7d6;
+    font-weight: bold;
+    margin-top: 10px;
+}
 
-    .hidden {
-        display: none;
-    }
+#title {
+    text-align: center;
+    color: #075e3b;
+}
 
-    footer {
-        text-align: center;
-        padding: 30px;
-        color: #666;
-    }
+#info {
+    text-align: center;
+    color: #666;
+}
+
+audio {
+    width: 100%;
+    margin: 15px 0 20px;
+}
+
+.ayah {
+    background: #f5faf7;
+    border: 1px solid #d7e8dd;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 12px 0;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.ayah:hover {
+    background: #eaf7ef;
+}
+
+.ayah.playing {
+    background: #d2efdc;
+    border: 3px solid #075e3b;
+}
+
+.number {
+    color: #075e3b;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.arabic {
+    direction: rtl;
+    text-align: right;
+    font-size: 29px;
+    line-height: 2.1;
+}
+
+.error {
+    color: #a00000;
+}
+
+.note {
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-    <h1>📖 My Quran App</h1>
-    <p>Read the Quran with English and Tamil meanings</p>
+    <h1>☪ My Quran</h1>
+    <p>Read • Listen • Repeat</p>
 </header>
-
-<div class="controls">
-
-    <select id="language" onchange="changeLanguage()">
-        <option value="english">🇬🇧 English Meaning</option>
-        <option value="tamil">🇱🇰 தமிழ் அர்த்தம்</option>
-    </select>
-
-    <button onclick="showArabicOnly()">📖 Arabic Only</button>
-
-    <button onclick="showBoth()">🌍 Show Meaning</button>
-
-</div>
 
 <div class="container">
 
-    <div class="ayah">
+    <div class="panel">
 
-        <div class="number">1</div>
+        <div class="row">
 
-        <div class="arabic">
-            بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+            <select id="surahList">
+                <option>Loading Surahs...</option>
+            </select>
+
+            <select id="reciterList">
+
+                <option value="ar.alafasy">
+                    Mishary Rashid Alafasy
+                </option>
+
+                <option value="ar.husary">
+                    Mahmoud Khalil Al-Husary
+                </option>
+
+            </select>
+
         </div>
 
-        <div class="meaning english">
-            In the name of Allah, the Most Compassionate, the Most Merciful.
+        <div class="row">
+
+            <select id="repeatCount">
+
+                <option value="1">
+                    🔁 Repeat each Ayah: 1 time
+                </option>
+
+                <option value="2">
+                    🔁 Repeat each Ayah: 2 times
+                </option>
+
+                <option value="3">
+                    🔁 Repeat each Ayah: 3 times
+                </option>
+
+                <option value="4">
+                    🔁 Repeat each Ayah: 4 times
+                </option>
+
+                <option value="5">
+                    🔁 Repeat each Ayah: 5 times
+                </option>
+
+                <option value="6">
+                    🔁 Repeat each Ayah: 6 times
+                </option>
+
+                <option value="7">
+                    🔁 Repeat each Ayah: 7 times
+                </option>
+
+                <option value="8">
+                    🔁 Repeat each Ayah: 8 times
+                </option>
+
+                <option value="9">
+                    🔁 Repeat each Ayah: 9 times
+                </option>
+
+                <option value="10">
+                    🔁 Repeat each Ayah: 10 times
+                </option>
+
+            </select>
+
         </div>
 
-        <div class="meaning tamil hidden">
-            அளவற்ற அருளாளனும் நிகரற்ற அன்புடையோனுமாகிய அல்லாஹ்வின் பெயரால்.
+        <div class="row">
+
+            <button onclick="openSurah()">
+                📖 Open Surah
+            </button>
+
+            <button onclick="playSurah()">
+                ▶️ Play Surah
+            </button>
+
+            <button onclick="previousAyah()">
+                ⏮️ Previous
+            </button>
+
+            <button onclick="nextAyah()">
+                ⏭️ Next
+            </button>
+
+            <button class="stop" onclick="stopAudio()">
+                ⏹️ Stop
+            </button>
+
         </div>
 
-    </div>
-
-
-    <div class="ayah">
-
-        <div class="number">2</div>
-
-        <div class="arabic">
-            الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ
-        </div>
-
-        <div class="meaning english">
-            All praise is for Allah—Lord of all worlds.
-        </div>
-
-        <div class="meaning tamil hidden">
-            அனைத்துலகங்களின் இறைவனான அல்லாஹ்வுக்கே எல்லாப் புகழும்.
-        </div>
-
-    </div>
-
-
-    <div class="ayah">
-
-        <div class="number">3</div>
-
-        <div class="arabic">
-            الرَّحْمَٰنِ الرَّحِيمِ
-        </div>
-
-        <div class="meaning english">
-            The Most Compassionate, the Most Merciful.
-        </div>
-
-        <div class="meaning tamil hidden">
-            அளவற்ற அருளாளன், நிகரற்ற அன்புடையோன்.
-        </div>
-
-    </div>
-
-
-    <div class="ayah">
-
-        <div class="number">4</div>
-
-        <div class="arabic">
-            مَالِكِ يَوْمِ الدِّينِ
-        </div>
-
-        <div class="meaning english">
-            Master of the Day of Judgment.
-        </div>
-
-        <div class="meaning tamil">
-            தீர்ப்பு நாளின் அதிபதி.
-        </div>
-
-    </div>
-
-
-    <div class="ayah">
-
-        <div class="number">5</div>
-
-        <div class="arabic">
-            إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ
-        </div>
-
-        <div class="meaning english">
-            You alone we worship, and You alone we ask for help.
-        </div>
-
-        <div class="meaning tamil hidden">
-            உன்னையே நாங்கள் வணங்குகிறோம்; உன்னிடமே உதவி தேடுகிறோம்.
-        </div>
-
-    </div>
-
-
-    <div class="ayah">
-
-        <div class="number">6</div>
-
-        <div class="arabic">
-            اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ
-        </div>
-
-        <div class="meaning english">
-            Guide us to the Straight Path.
-        </div>
-
-        <div class="meaning tamil hidden">
-            எங்களை நேரான பாதையில் வழிநடத்துவாயாக.
+        <div id="status" class="status">
+            Loading Quran...
         </div>
 
     </div>
 
+    <div class="quran-card">
 
-    <div class="ayah">
+        <h2 id="title">
+            Quran
+        </h2>
 
-        <div class="number">7</div>
+        <p id="info"></p>
 
-        <div class="arabic">
-            صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ
-            غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ
-            وَلَا الضَّالِّينَ
-        </div>
+        <audio
+            id="audio"
+            controls
+            preload="auto">
+        </audio>
 
-        <div class="meaning english">
-            The path of those You have blessed—not those You are displeased with, or those who are astray.
-        </div>
+        <p class="note">
+            Press Play Surah once. It continues through the whole Surah automatically.
+        </p>
 
-        <div class="meaning tamil hidden">
-            நீ அருள் புரிந்தவர்களின் பாதையில்; உன் கோபத்திற்கு ஆளானவர்களின் பாதையிலும் வழிதவறியவர்களின் பாதையிலும் அல்ல.
-        </div>
+        <div id="quran"></div>
 
     </div>
 
 </div>
 
-<footer>
-    My Quran App ❤️
-</footer>
-
-
 <script>
 
-function changeLanguage() {
+const API =
+    "https://api.alquran.cloud/v1";
 
-    const language = document.getElementById("language").value;
+let ayahs = [];
+let audioAyahs = [];
+let currentAyah = 0;
+let repeatTimes = 1;
+let repeatNumber = 1;
+let playing = false;
 
-    const english = document.querySelectorAll(".english");
-    const tamil = document.querySelectorAll(".tamil");
+const audio =
+    document.getElementById("audio");
 
-    if (language === "english") {
+const surahList =
+    document.getElementById("surahList");
 
-        english.forEach(item => {
-            item.classList.remove("hidden");
+const reciterList =
+    document.getElementById("reciterList");
+
+const repeatCount =
+    document.getElementById("repeatCount");
+
+const quran =
+    document.getElementById("quran");
+
+const statusBox =
+    document.getElementById("status");
+
+const title =
+    document.getElementById("title");
+
+const info =
+    document.getElementById("info");
+
+
+// ======================================
+// LOAD ALL 114 SURAHS
+// ======================================
+
+async function loadSurahs() {
+
+    try {
+
+        statusBox.textContent =
+            "⏳ Loading all 114 Surahs...";
+
+        const response =
+            await fetch(API + "/surah");
+
+        if (!response.ok) {
+            throw new Error("Could not load Surahs.");
+        }
+
+        const result =
+            await response.json();
+
+        surahList.innerHTML = "";
+
+        result.data.forEach(function(surah) {
+
+            const option =
+                document.createElement("option");
+
+            option.value =
+                surah.number;
+
+            option.textContent =
+                surah.number +
+                ". " +
+                surah.englishName +
+                " — " +
+                surah.name;
+
+            surahList.appendChild(option);
+
         });
 
-        tamil.forEach(item => {
-            item.classList.add("hidden");
-        });
+        await openSurah();
 
-    } else {
+    } catch (error) {
 
-        english.forEach(item => {
-            item.classList.add("hidden");
-        });
+        console.error(error);
 
-        tamil.forEach(item => {
-            item.classList.remove("hidden");
-        });
+        statusBox.innerHTML =
+            '<span class="error">❌ Could not load Surahs. Check your internet connection.</span>';
+
     }
 }
 
 
-function showArabicOnly() {
+// ======================================
+// OPEN SURAH
+// ======================================
 
-    document.querySelectorAll(".meaning").forEach(item => {
-        item.classList.add("hidden");
+async function openSurah() {
+
+    stopAudio();
+
+    audioAyahs = [];
+
+    const number =
+        surahList.value;
+
+    if (!number) {
+        return;
+    }
+
+    statusBox.textContent =
+        "⏳ Loading Surah...";
+
+    quran.innerHTML =
+        "<p>Loading Quran...</p>";
+
+    try {
+
+        const response =
+            await fetch(
+                API +
+                "/surah/" +
+                number +
+                "/quran-uthmani"
+            );
+
+        if (!response.ok) {
+            throw new Error("Quran text failed.");
+        }
+
+        const result =
+            await response.json();
+
+        ayahs =
+            result.data.ayahs;
+
+        currentAyah = 0;
+        repeatNumber = 1;
+
+        title.textContent =
+            result.data.englishName +
+            " — " +
+            result.data.name;
+
+        info.textContent =
+            result.data.englishNameTranslation +
+            " • " +
+            result.data.numberOfAyahs +
+            " Ayahs • " +
+            result.data.revelationType;
+
+        renderAyahs();
+
+        statusBox.textContent =
+            "✅ Surah loaded. Press Play Surah.";
+
+    } catch (error) {
+
+        console.error(error);
+
+        statusBox.innerHTML =
+            '<span class="error">❌ Could not load this Surah.</span>';
+
+    }
+}
+
+
+// ======================================
+// LOAD AUDIO FOR WHOLE SURAH
+// ======================================
+
+async function loadAudio() {
+
+    const reciter =
+        reciterList.value;
+
+    statusBox.textContent =
+        "⏳ Loading recitation...";
+
+    try {
+
+        const response =
+            await fetch(
+                API +
+                "/surah/" +
+                surahList.value +
+                "/" +
+                reciter
+            );
+
+        if (!response.ok) {
+            throw new Error("Audio request failed.");
+        }
+
+        const result =
+            await response.json();
+
+        if (
+            !result.data ||
+            !result.data.ayahs
+        ) {
+            throw new Error("No audio returned.");
+        }
+
+        audioAyahs =
+            result.data.ayahs;
+
+        if (
+            audioAyahs.length !==
+            ayahs.length
+        ) {
+            throw new Error("Audio count does not match.");
+        }
+
+        return true;
+
+    } catch (error) {
+
+        console.error(error);
+
+        statusBox.innerHTML =
+            '<span class="error">❌ Audio could not be loaded. Try the other reciter or check your internet.</span>';
+
+        return false;
+    }
+}
+
+
+// ======================================
+// DISPLAY AYahs
+// ======================================
+
+function renderAyahs() {
+
+    quran.innerHTML = "";
+
+    ayahs.forEach(function(ayah, index) {
+
+        const box =
+            document.createElement("div");
+
+        box.className = "ayah";
+        box.id = "ayah-" + index;
+
+        const number =
+            document.createElement("div");
+
+        number.className = "number";
+
+        number.textContent =
+            "Ayah " +
+            ayah.numberInSurah;
+
+        const text =
+            document.createElement("div");
+
+        text.className = "arabic";
+
+        text.textContent =
+            ayah.text;
+
+        box.appendChild(number);
+        box.appendChild(text);
+
+        box.onclick =
+            async function() {
+
+                if (
+                    audioAyahs.length !==
+                    ayahs.length
+                ) {
+
+                    const loaded =
+                        await loadAudio();
+
+                    if (!loaded) {
+                        return;
+                    }
+                }
+
+                currentAyah = index;
+
+                repeatNumber = 1;
+
+                repeatTimes =
+                    Number(
+                        repeatCount.value
+                    );
+
+                playing = true;
+
+                playCurrentAyah();
+            };
+
+        quran.appendChild(box);
+
     });
-
 }
 
 
-function showBoth() {
+// ======================================
+// PLAY WHOLE SURAH
+// ======================================
 
-    changeLanguage();
+async function playSurah() {
 
+    if (!ayahs.length) {
+
+        alert(
+            "Please open a Surah first."
+        );
+
+        return;
+    }
+
+    repeatTimes =
+        Number(
+            repeatCount.value
+        );
+
+    currentAyah = 0;
+    repeatNumber = 1;
+
+    const loaded =
+        await loadAudio();
+
+    if (!loaded) {
+        return;
+    }
+
+    playing = true;
+
+    playCurrentAyah();
 }
+
+
+// ======================================
+// PLAY CURRENT AYAH
+// ======================================
+
+function playCurrentAyah() {
+
+    if (!playing) {
+        return;
+    }
+
+    const item =
+        audioAyahs[currentAyah];
+
+    if (
+        !item ||
+        !item.audio
+    ) {
+
+        playing = false;
+
+        statusBox.innerHTML =
+            '<span class="error">❌ Audio missing for this Ayah.</span>';
+
+        return;
+    }
+
+    audio.src =
+        item.audio;
+
+    audio.load();
+
+    highlightAyah();
+
+    const reciterName =
+        reciterList
+            .options[
+                reciterList.selectedIndex
+            ]
+            .textContent
+            .trim();
+
+    statusBox.textContent =
+        "▶️ " +
+        reciterName +
+        " • Ayah " +
+        ayahs[currentAyah].numberInSurah +
+        " • Repeat " +
+        repeatNumber +
+        "/" +
+        repeatTimes;
+
+    audio.play()
+        .catch(function(error) {
+
+            console.error(error);
+
+            statusBox.textContent =
+                "🔊 Press the ▶️ button on the audio player once.";
+
+        });
+}
+
+
+// ======================================
+// WHEN AN AYAH FINISHES
+// ======================================
+
+audio.addEventListener(
+    "ended",
+    function() {
+
+        if (!playing) {
+            return;
+        }
+
+        if (
+            repeatNumber <
+            repeatTimes
+        ) {
+
+            repeatNumber++;
+
+            playCurrentAyah();
+
+            return;
+        }
+
+        repeatNumber = 1;
+
+        currentAyah++;
+
+        if (
+            currentAyah >=
+            ayahs.length
+        ) {
+
+            playing = false;
+
+            statusBox.textContent =
+                "🎉 The whole Surah is finished!";
+
+            document
+                .querySelectorAll(".ayah")
+                .forEach(function(element) {
+
+                    element.classList.remove(
+                        "playing"
+                    );
+
+                });
+
+            return;
+        }
+
+        // Automatically continue
+        // to the next Ayah.
+
+        playCurrentAyah();
+
+    }
+);
+
+
+// ======================================
+// HIGHLIGHT AYAH
+// ======================================
+
+function highlightAyah() {
+
+    document
+        .querySelectorAll(".ayah")
+        .forEach(function(element) {
+
+            element.classList.remove(
+                "playing"
+            );
+
+        });
+
+    const current =
+        document.getElementById(
+            "ayah-" + currentAyah
+        );
+
+    if (current) {
+
+        current.classList.add(
+            "playing"
+        );
+
+        current.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+    }
+}
+
+
+// ======================================
+// NEXT AYAH
+// ======================================
+
+function nextAyah() {
+
+    if (!ayahs.length) {
+        return;
+    }
+
+    currentAyah++;
+
+    if (
+        currentAyah >=
+        ayahs.length
+    ) {
+        currentAyah = 0;
+    }
+
+    repeatNumber = 1;
+
+    repeatTimes =
+        Number(
+            repeatCount.value
+        );
+
+    if (
+        audioAyahs.length ===
+        ayahs.length
+    ) {
+
+        playing = true;
+
+        playCurrentAyah();
+    }
+}
+
+
+// ======================================
+// PREVIOUS AYAH
+// ======================================
+
+function previousAyah() {
+
+    if (!ayahs.length) {
+        return;
+    }
+
+    currentAyah--;
+
+    if (currentAyah < 0) {
+        currentAyah =
+            ayahs.length - 1;
+    }
+
+    repeatNumber = 1;
+
+    repeatTimes =
+        Number(
+            repeatCount.value
+        );
+
+    if (
+        audioAyahs.length ===
+        ayahs.length
+    ) {
+
+        playing = true;
+
+        playCurrentAyah();
+    }
+}
+
+
+// ======================================
+// STOP
+// ======================================
+
+function stopAudio() {
+
+    playing = false;
+
+    audio.pause();
+
+    audio.currentTime = 0;
+
+    document
+        .querySelectorAll(".ayah")
+        .forEach(function(element) {
+
+            element.classList.remove(
+                "playing"
+            );
+
+        });
+}
+
+
+// ======================================
+// SURAH CHANGED
+// ======================================
+
+surahList.addEventListener(
+    "change",
+    function() {
+
+        openSurah();
+
+    }
+);
+
+
+// ======================================
+// RECITER CHANGED
+// ======================================
+
+reciterList.addEventListener(
+    "change",
+    function() {
+
+        stopAudio();
+
+        audioAyahs = [];
+
+        statusBox.textContent =
+            "✅ Reciter changed. Press Play Surah.";
+
+    }
+);
+
+
+// ======================================
+// START
+// ======================================
+
+loadSurahs();
 
 </script>
 
 </body>
 </html>
-```
