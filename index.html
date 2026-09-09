@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Quran</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #eef7f1;
+    color: #123b2a;
+}
+
+header {
+    background: #075e3b;
+    color: white;
+    text-align: center;
+    padding: 28px 15px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 36px;
+}
+
+header p {
+    margin: 8px 0 0;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+}
+
+.panel,
+.quran-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+select,
+button {
+    padding: 12px 14px;
+    font-size: 16px;
+    border-radius: 9px;
+    border: 1px solid #aaa;
+}
+
+select {
+    flex: 1;
+    min-width: 230px;
+    background: white;
+}
+
+button {
+    background: #075e3b;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #08784b;
+}
+
+.stop {
+    background: #a52828;
+}
+
+.status {
+    padding: 14px;
+    border-radius: 10px;
+    background: #fff7d6;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+#title {
+    text-align: center;
+    color: #075e3b;
+}
+
+#info {
+    text-align: center;
+    color: #666;
+}
+
+audio {
+    width: 100%;
+    margin: 15px 0 20px;
+}
+
+.ayah {
+    background: #f5faf7;
+    border: 1px solid #d7e8dd;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 12px 0;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.ayah:hover {
+    background: #eaf7ef;
+}
+
+.ayah.playing {
+    background: #d2efdc;
+    border: 3px solid #075e3b;
+}
+
+.number {
+    color: #075e3b;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.arabic {
+    direction: rtl;
+    text-align: right;
+    font-size: 29px;
+    line-height: 2.1;
+}
+
+.error {
+    color: #a00000;
+}
+
+.note {
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>☪ My Quran</h1>
+    <p>Read • Listen • Repeat</p>
+</header>
+
+<div class="container">
+
+    <div class="panel">
+
+        <div class="row">
+
+            <select id="surahList">
+                <option>Loading Surahs...</option>
+            </select>
+
+            <select id="reciterList">
+
+                <option value="ar.alafasy">
+                    Mishary Rashid Alafasy
+                </option>
+
+                <option value="ar.husary">
+                    Mahmoud Khalil Al-Husary
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="row">
+
+            <select id="repeatCount">
+
+                <option value="1">
+                    🔁 Repeat each Ayah: 1 time
+                </option>
+
+                <option value="2">
+                    🔁 Repeat each Ayah: 2 times
+                </option>
+
+                <option value="3">
+                    🔁 Repeat each Ayah: 3 times
+                </option>
+
+                <option value="4">
+                    🔁 Repeat each Ayah: 4 times
+                </option>
+
+                <option value="5">
+                    🔁 Repeat each Ayah: 5 times
+                </option>
+
+                <option value="6">
+                    🔁 Repeat each Ayah: 6 times
+                </option>
+
+                <option value="7">
+                    🔁 Repeat each Ayah: 7 times
+                </option>
+
+                <option value="8">
+                    🔁 Repeat each Ayah: 8 times
+                </option>
+
+                <option value="9">
+                    🔁 Repeat each Ayah: 9 times
+                </option>
+
+                <option value="10">
+                    🔁 Repeat each Ayah: 10 times
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="row">
+
+            <button onclick="openSurah()">
+                📖 Open Surah
+            </button>
+
+            <button onclick="playSurah()">
+                ▶️ Play Surah
+            </button>
+
+            <button onclick="previousAyah()">
+                ⏮️ Previous
+            </button>
+
+            <button onclick="nextAyah()">
+                ⏭️ Next
+            </button>
+
+            <button class="stop" onclick="stopAudio()">
+                ⏹️ Stop
+            </button>
+
+        </div>
+
+        <div id="status" class="status">
+            Loading Quran...
+        </div>
+
+    </div>
+
+    <div class="quran-card">
+
+        <h2 id="title">
+            Quran
+        </h2>
+
+        <p id="info"></p>
+
+        <audio
+            id="audio"
+            controls
+            preload="auto">
+        </audio>
+
+        <p class="note">
+            Press Play Surah once. It continues through the whole Surah automatically.
+        </p>
+
+        <div id="quran"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+const API =
+    "https://api.alquran.cloud/v1";
+
+let ayahs = [];
+let audioAyahs = [];
+let currentAyah = 0;
+let repeatTimes = 1;
+let repeatNumber = 1;
+let playing = false;
+
+const audio =
+    document.getElementById("audio");
+
+const surahList =
+    document.getElementById("surahList");
+
+const reciterList =
+    document.getElementById("reciterList");
+
+const repeatCount =
+    document.getElementById("repeatCount");
+
+const quran =
+    document.getElementById("quran");
+
+const statusBox =
+    document.getElementById("status");
+
+const title =
+    document.getElementById("title");
+
+const info =
+    document.getElementById("info");
+
+
+// ======================================
+// LOAD ALL 114 SURAHS
+// ======================================
+
+async function loadSurahs() {
+
+    try {
+
+        statusBox.textContent =
+            "⏳ Loading all 114 Surahs...";
+
+        const response =
+            await fetch(API + "/surah");
+
+        if (!response.ok) {
+            throw new Error("Could not load Surahs.");
+        }
+
+        const result =
+            await response.json();
+
+        surahList.innerHTML = "";
+
+        result.data.forEach(function(surah) {
+
+            const option =
+                document.createElement("option");
+
+            option.value =
+                surah.number;
+
+            option.textContent =
+                surah.number +
+                ". " +
+                surah.englishName +
+                " — " +
+                surah.name;
+
+            surahList.appendChild(option);
+
+        });
+
+        await openSurah();
+
+    } catch (error) {
+
+        console.error(error);
+
+        statusBox.innerHTML =
+            '<span class="error">❌ Could not load Surahs. Check your internet connection.</span>';
+
+    }
+}
+
+
+// ======================================
+// OPEN SURAH
+// ======================================
+
+async function openSurah() {
+
+    stopAudio();
+
+    audioAyahs = [];
+
+    const number =
+        surahList.value;
+
+    if (!number) {
+        return;
+    }
+
+    statusBox.textContent =
+        "⏳ Loading Surah...";
+
+    quran.innerHTML =
+        "<p>Loading Quran...</p>";
+
+    try {
+
+        const response =
+            await fetch(
+                API +
+                "/surah/" +
+                number +
+                "/quran-uthmani"
+            );
+
+        if (!response.ok) {
+            throw new Error("Quran text failed.");
+        }
+
+        const result =
+            await response.json();
+
+        ayahs =
+            result.data.ayahs;
+
+        currentAyah = 0;
+        repeatNumber = 1;
+
+        title.textContent =
+            result.data.englishName +
+            " — " +
+            result.data.name;
+
+        info.textContent =
+            result.data.englishNameTranslation +
+            " • " +
+            result.data.numberOfAyahs +
+            " Ayahs • " +
+            result.data.revelationType;
+
+        renderAyahs();
+
+        statusBox.textContent =
+            "✅ Surah loaded. Press Play Surah.";
+
+    } catch (error) {
+
+        console.error(error);
+
+        statusBox.innerHTML =
+            '<span class="error">❌ Could not load this Surah.</span>';
+
+    }
+}
+
+
+// ======================================
+// LOAD AUDIO FOR WHOLE SURAH
+// ======================================
+
+async function loadAudio() {
+
+    const reciter =
+        reciterList.value;
+
+    statusBox.textContent =
+        "⏳ Loading recitation...";
+
+    try {
+
+        const response =
+            await fetch(
+                API +
+                "/surah/" +
+                surahList.value +
+                "/" +
+                reciter
+            );
+
+        if (!response.ok) {
+            throw new Error("Audio request failed.");
+        }
+
+        const result =
+            await response.json();
+
+        if (
+            !result.data ||
+            !result.data.ayahs
+        ) {
+            throw new Error("No audio returned.");
+        }
+
+        audioAyahs =
+            result.data.ayahs;
+
+        if (
+            audioAyahs.length !==
+            ayahs.length
+        ) {
+            throw new Error("Audio count does not match.");
+        }
+
+        return true;
+
+    } catch (error) {
+
+        console.error(error);
+
+        statusBox.innerHTML =
+            '<span class="error">❌ Audio could not be loaded. Try the other reciter or check your internet.</span>';
+
+        return false;
+    }
+}
+
+
+// ======================================
+// DISPLAY AYahs
+// ======================================
+
+function renderAyahs() {
+
+    quran.innerHTML = "";
+
+    ayahs.forEach(function(ayah, index) {
+
+        const box =
+            document.createElement("div");
+
+        box.className = "ayah";
+        box.id = "ayah-" + index;
+
+        const number =
+            document.createElement("div");
+
+        number.className = "number";
+
+        number.textContent =
+            "Ayah " +
+            ayah.numberInSurah;
+
+        const text =
+            document.createElement("div");
+
+        text.className = "arabic";
+
+        text.textContent =
+            ayah.text;
+
+        box.appendChild(number);
+        box.appendChild(text);
+
+        box.onclick =
+            async function() {
+
+                if (
+                    audioAyahs.length !==
+                    ayahs.length
+                ) {
+
+                    const loaded =
+                        await loadAudio();
+
+                    if (!loaded) {
+                        return;
+                    }
+                }
+
+                currentAyah = index;
+
+                repeatNumber = 1;
+
+                repeatTimes =
+                    Number(
+                        repeatCount.value
+                    );
+
+                playing = true;
+
+                playCurrentAyah();
+            };
+
+        quran.appendChild(box);
+
+    });
+}
+
+
+// ======================================
+// PLAY WHOLE SURAH
+// ======================================
+
+async function playSurah() {
+
+    if (!ayahs.length) {
+
+        alert(
+            "Please open a Surah first."
+        );
+
+        return;
+    }
+
+    repeatTimes =
+        Number(
+            repeatCount.value
+        );
+
+    currentAyah = 0;
+    repeatNumber = 1;
+
+    const loaded =
+        await loadAudio();
+
+    if (!loaded) {
+        return;
+    }
+
+    playing = true;
+
+    playCurrentAyah();
+}
+
+
+// ======================================
+// PLAY CURRENT AYAH
+// ======================================
+
+function playCurrentAyah() {
+
+    if (!playing) {
+        return;
+    }
+
+    const item =
+        audioAyahs[currentAyah];
+
+    if (
+        !item ||
+        !item.audio
+    ) {
+
+        playing = false;
+
+        statusBox.innerHTML =
+            '<span class="error">❌ Audio missing for this Ayah.</span>';
+
+        return;
+    }
+
+    audio.src =
+        item.audio;
+
+    audio.load();
+
+    highlightAyah();
+
+    const reciterName =
+        reciterList
+            .options[
+                reciterList.selectedIndex
+            ]
+            .textContent
+            .trim();
+
+    statusBox.textContent =
+        "▶️ " +
+        reciterName +
+        " • Ayah " +
+        ayahs[currentAyah].numberInSurah +
+        " • Repeat " +
+        repeatNumber +
+        "/" +
+        repeatTimes;
+
+    audio.play()
+        .catch(function(error) {
+
+            console.error(error);
+
+            statusBox.textContent =
+                "🔊 Press the ▶️ button on the audio player once.";
+
+        });
+}
+
+
+// ======================================
+// WHEN AN AYAH FINISHES
+// ======================================
+
+audio.addEventListener(
+    "ended",
+    function() {
+
+        if (!playing) {
+            return;
+        }
+
+        if (
+            repeatNumber <
+            repeatTimes
+        ) {
+
+            repeatNumber++;
+
+            playCurrentAyah();
+
+            return;
+        }
+
+        repeatNumber = 1;
+
+        currentAyah++;
+
+        if (
+            currentAyah >=
+            ayahs.length
+        ) {
+
+            playing = false;
+
+            statusBox.textContent =
+                "🎉 The whole Surah is finished!";
+
+            document
+                .querySelectorAll(".ayah")
+                .forEach(function(element) {
+
+                    element.classList.remove(
+                        "playing"
+                    );
+
+                });
+
+            return;
+        }
+
+        // Automatically continue
+        // to the next Ayah.
+
+        playCurrentAyah();
+
+    }
+);
+
+
+// ======================================
+// HIGHLIGHT AYAH
+// ======================================
+
+function highlightAyah() {
+
+    document
+        .querySelectorAll(".ayah")
+        .forEach(function(element) {
+
+            element.classList.remove(
+                "playing"
+            );
+
+        });
+
+    const current =
+        document.getElementById(
+            "ayah-" + currentAyah
+        );
+
+    if (current) {
+
+        current.classList.add(
+            "playing"
+        );
+
+        current.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+    }
+}
+
+
+// ======================================
+// NEXT AYAH
+// ======================================
+
+function nextAyah() {
+
+    if (!ayahs.length) {
+        return;
+    }
+
+    currentAyah++;
+
+    if (
+        currentAyah >=
+        ayahs.length
+    ) {
+        currentAyah = 0;
+    }
+
+    repeatNumber = 1;
+
+    repeatTimes =
+        Number(
+            repeatCount.value
+        );
+
+    if (
+        audioAyahs.length ===
+        ayahs.length
+    ) {
+
+        playing = true;
+
+        playCurrentAyah();
+    }
+}
+
+
+// ======================================
+// PREVIOUS AYAH
+// ======================================
+
+function previousAyah() {
+
+    if (!ayahs.length) {
+        return;
+    }
+
+    currentAyah--;
+
+    if (currentAyah < 0) {
+        currentAyah =
+            ayahs.length - 1;
+    }
+
+    repeatNumber = 1;
+
+    repeatTimes =
+        Number(
+            repeatCount.value
+        );
+
+    if (
+        audioAyahs.length ===
+        ayahs.length
+    ) {
+
+        playing = true;
+
+        playCurrentAyah();
+    }
+}
+
+
+// ======================================
+// STOP
+// ======================================
+
+function stopAudio() {
+
+    playing = false;
+
+    audio.pause();
+
+    audio.currentTime = 0;
+
+    document
+        .querySelectorAll(".ayah")
+        .forEach(function(element) {
+
+            element.classList.remove(
+                "playing"
+            );
+
+        });
+}
+
+
+// ======================================
+// SURAH CHANGED
+// ======================================
+
+surahList.addEventListener(
+    "change",
+    function() {
+
+        openSurah();
+
+    }
+);
+
+
+// ======================================
+// RECITER CHANGED
+// ======================================
+
+reciterList.addEventListener(
+    "change",
+    function() {
+
+        stopAudio();
+
+        audioAyahs = [];
+
+        statusBox.textContent =
+            "✅ Reciter changed. Press Play Surah.";
+
+    }
+);
+
+
+// ======================================
+// START
+// ======================================
+
+loadSurahs();
+
+</script>
+
+</body>
+</html>
